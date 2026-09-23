@@ -6,20 +6,28 @@
 
     <h2>Daftar Buku</h2>
 
-    @if($stock > 0)
-        <p>Buku tersedia: {{ $stock }}</p>
-    @else
-        <p>Buku sedang habis.</p>
-    @endif
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Judul</th>
+                <th>Penulis</th>
+                <th>Tahun Terbit</th>
+                <th>Stok</th>
+            </tr>
+        </thead>
 
-    <ul>
-        @foreach($books as $book)
-            <li>
-                <strong>{{ $book['title'] }}</strong>
-                - {{ $book['author'] }}
-                - {{ $book['year'] }}
-            </li>
-        @endforeach
-    </ul>
+        <tbody>
+            @foreach($books as $book)
+                <tr>
+                    <td>{{ $book->id }}</td>
+                    <td>{{ $book->title }}</td>
+                    <td>{{ $book->author }}</td>
+                    <td>{{ $book->year }}</td>
+                    <td>{{ $book->stock }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 
 @endsection
