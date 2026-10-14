@@ -1,10 +1,16 @@
+
 @extends('layouts.app')
 
 @section('title', 'Books')
 
 @section('content')
-
     <h2>Daftar Buku</h2>
+
+    @if (session('success'))
+        <p style="color: green;">
+            {{ session('success') }}
+        </p>
+    @endif
 
     <a href="{{ route('books.create') }}">Tambah Buku</a>
 
@@ -23,7 +29,7 @@
         </thead>
 
         <tbody>
-            @foreach($books as $book)
+            @forelse ($books as $book)
                 <tr>
                     <td>{{ $book->id }}</td>
                     <td>{{ $book->title }}</td>
@@ -31,20 +37,36 @@
                     <td>{{ $book->year }}</td>
                     <td>{{ $book->stock }}</td>
                     <td>
-                        <a href="{{ route('books.show', $book) }}">Detail</a>
+                        <a href="{{ route('books.show', $book) }}">
+                            Detail
+                        </a>
 
-                        <a href="{{ route('books.edit', $book) }}">Edit</a>
+                        <a href="{{ route('books.edit', $book) }}">
+                            Edit
+                        </a>
 
-                        <form action="{{ route('books.destroy', $book) }}" method="POST" style="display:inline;">
+                        <form
+                            action="{{ route('books.destroy', $book) }}"
+                            method="POST"
+                            style="display: inline;"
+                        >
                             @csrf
                             @method('DELETE')
 
-                            <button type="submit">Hapus</button>
+                            <button
+                                type="submit"
+                                onclick="return confirm('Yakin ingin menghapus buku ini?')"
+                            >
+                                Hapus
+                            </button>
                         </form>
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="6">Belum ada data buku.</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
-
 @endsection
