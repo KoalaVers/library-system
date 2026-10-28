@@ -9,13 +9,18 @@
 <body>
     <h1>Daftar Buku</h1>
 
+    <form action="{{ route('logout') }}" method="POST">
+        @csrf
+        <button type="submit">Logout</button>
+    </form>
+
     @if (session('success'))
         <p>{{ session('success') }}</p>
     @endif
 
-    <a href="{{ route('books.create') }}">Tambah Buku</a>
-
-    <br><br>
+    <p>
+        <a href="{{ route('books.create') }}">Tambah Buku</a>
+    </p>
 
     <table border="1" cellpadding="8" cellspacing="0">
         <thead>
