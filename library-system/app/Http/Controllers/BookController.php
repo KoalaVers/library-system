@@ -112,12 +112,13 @@ class BookController extends Controller
             ->with('success', 'Data buku berhasil diperbarui.');
     }
 
-    public function destroy(Book $book)
-    {
-        $book->delete();
+public function destroy(Book $book)
+{
+    \Illuminate\Support\Facades\Gate::authorize('delete', $book);
 
-        return redirect()
-            ->route('books.index')
-            ->with('success', 'Data buku berhasil dihapus.');
+    $book->delete();
+
+    return redirect()->route('books.index')
+        ->with('success', 'Buku berhasil dihapus.');
     }
 }

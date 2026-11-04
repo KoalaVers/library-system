@@ -9,6 +9,14 @@
 <body>
     <h1>Daftar Buku</h1>
 
+    @can('manage-users')
+        <p>
+            <a href="{{ url('/admin-gate-test') }}">
+                Kelola Pengguna
+            </a>
+        </p>
+    @endcan
+
     <form action="{{ route('logout') }}" method="POST">
         @csrf
         <button type="submit">Logout</button>
@@ -48,16 +56,19 @@
                         |
                         <a href="{{ route('books.edit', $book->id) }}">Edit</a>
                         |
-                        <form
-                            action="{{ route('books.destroy', $book->id) }}"
-                            method="POST"
-                            style="display: inline;"
-                            onsubmit="return confirm('Yakin ingin menghapus buku ini?')"
-                        >
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit">Hapus</button>
-                        </form>
+
+                        @can('delete', $book)
+                            <form
+                                action="{{ route('books.destroy', $book->id) }}"
+                                method="POST"
+                                style="display: inline;"
+                                onsubmit="return confirm('Yakin ingin menghapus buku ini?')"
+                            >
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit">Hapus</button>
+                            </form>
+                        @endcan
                     </td>
                 </tr>
             @empty

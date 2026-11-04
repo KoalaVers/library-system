@@ -32,3 +32,15 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/members', [MemberController::class, 'index']);
 });
+
+// Route khusus Admin untuk pengujian Middleware
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin-test', function () {
+        return 'Selamat datang, Admin! Anda memiliki akses.';
+    });
+});
+
+// Route pengujian Gate
+Route::get('/admin-gate-test', function () {
+    return 'Gate berhasil! Admin boleh mengelola pengguna.';
+})->middleware(['auth', 'can:manage-users']);
