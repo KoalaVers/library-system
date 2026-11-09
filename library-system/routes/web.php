@@ -6,11 +6,14 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\UserController;
 
+// Halaman utama
 Route::get('/', function () {
     return view('welcome');
 });
 
+// Login
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])
         ->name('login');
@@ -19,28 +22,31 @@ Route::middleware('guest')->group(function () {
         ->name('login.submit');
 });
 
+// Logout
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
+// Halaman yang hanya bisa diakses setelah login
 Route::middleware('auth')->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
+
+    // Book Management
     Route::resource('books', BookController::class);
 
-    Route::get('/dashboard', [DashboardController::class, 'index']);
+    // Category Management
+    Route::get('/categories', [CategoryController::class, 'index'])
+        ->name('categories.index');
 
-    Route::get('/categories', [CategoryController::class, 'index']);
+    // Member Management
+    Route::get('/members', [MemberController::class, 'index'])
+        ->name('members.index');
 
-    Route::get('/members', [MemberController::class, 'index']);
+    // User Management khusus Admin
+    Route::resource('users', UserController::class)
+        ->except(['show'])
+        ->middleware('can:manage-users');
 });
-
-// Route khusus Admin untuk pengujian Middleware
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin-test', function () {
-        return 'Selamat datang, Admin! Anda memiliki akses.';
-    });
-});
-
-// Route pengujian Gate
-Route::get('/admin-gate-test', function () {
-    return 'Gate berhasil! Admin boleh mengelola pengguna.';
-})->middleware(['auth', 'can:manage-users']);

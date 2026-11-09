@@ -1,26 +1,11 @@
 
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Buku</title>
-</head>
-<body>
+@extends('layouts.app')
+
+@section('title', 'Daftar Buku')
+
+@section('content')
+
     <h1>Daftar Buku</h1>
-
-    @can('manage-users')
-        <p>
-            <a href="{{ url('/admin-gate-test') }}">
-                Kelola Pengguna
-            </a>
-        </p>
-    @endcan
-
-    <form action="{{ route('logout') }}" method="POST">
-        @csrf
-        <button type="submit">Logout</button>
-    </form>
 
     @if (session('success'))
         <p>{{ session('success') }}</p>
@@ -42,6 +27,7 @@
                 <th>Aksi</th>
             </tr>
         </thead>
+
         <tbody>
             @forelse ($books as $book)
                 <tr>
@@ -78,5 +64,5 @@
             @endforelse
         </tbody>
     </table>
-</body>
-</html>
+
+@endsection

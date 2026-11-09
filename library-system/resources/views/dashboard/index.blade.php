@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 
 @section('title', 'Dashboard')
@@ -8,8 +9,10 @@
 
     <p>{{ $description }}</p>
 
-    <p>Jumlah Buku: {{ $bookCount }}</p>
-    <p>Jumlah Member: {{ $memberCount }}</p>
-    <p>Jumlah Kategori: {{ $categoryCount }}</p>
+    <h3>Ringkasan Perpustakaan</h3>
+
+    <p>Total Judul Buku: {{ $bookCount }}</p>
+
+    <p>Total Stok Buku: {{ $totalStock }}</p>
 
 @endsection

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Book;
+
 class DashboardController extends Controller
 {
     public function index()
@@ -9,16 +11,15 @@ class DashboardController extends Controller
         $title = 'Library System';
         $description = 'Sistem Informasi Perpustakaan Sederhana';
 
-        $bookCount = 8;
-        $memberCount = 5;
-        $categoryCount = 5;
+        // Mengambil data buku langsung dari database
+        $bookCount = Book::count();
+        $totalStock = Book::sum('stock');
 
         return view('dashboard.index', compact(
             'title',
             'description',
             'bookCount',
-            'memberCount',
-            'categoryCount'
+            'totalStock'
         ));
     }
 }
