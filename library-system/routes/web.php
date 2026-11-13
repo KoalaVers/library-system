@@ -7,6 +7,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\BorrowingController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -24,12 +25,24 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
+
     Route::resource('books', BookController::class);
 
     Route::resource('categories', CategoryController::class);
     Route::resource('members', MemberController::class);
+
+    // Borrowing Management
+    Route::resource('borrowings', BorrowingController::class)
+        ->only(['index', 'create', 'store', 'show']);
+
+    // Pengembalian buku
+    Route::post(
+        '/borrowings/{borrowing}/return',
+        [BorrowingController::class, 'returnBook']
+    )->name('borrowings.return');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
