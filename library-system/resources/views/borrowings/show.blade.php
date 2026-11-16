@@ -1,19 +1,26 @@
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Detail Peminjaman</title>
-</head>
-<body>
-    <h1>Detail Peminjaman Buku</h1>
+@extends('layouts.app')
+
+@section('title', 'Detail Peminjaman')
+
+@section('content')
+    <h2>Detail Peminjaman Buku</h2>
 
     @if (session('success'))
-        <p style="color: green;">
-            {{ session('success') }}
-        </p>
+        <p style="color: green;">{{ session('success') }}</p>
     @endif
 
-    <a href="{{ route('borrowings.index') }}">Kembali ke Daftar Peminjaman</a>
+    @if ($errors->any())
+        <div style="color: red;">
+            @foreach ($errors->all() as $error)
+                <p>{{ $error }}</p>
+            @endforeach
+        </div>
+    @endif
+
+    <a href="{{ route('borrowings.index') }}">
+        Kembali ke Daftar Peminjaman
+    </a>
 
     <hr>
 
@@ -23,9 +30,11 @@
     <p><strong>Nama Anggota:</strong> {{ $borrowing->member->name }}</p>
     <p><strong>Kode Anggota:</strong> {{ $borrowing->member->member_code }}</p>
     <p><strong>Petugas:</strong> {{ $borrowing->user->name }}</p>
-    <p><strong>Tanggal Pinjam:</strong> {{ $borrowing->borrow_date }}</p>
-    <p><strong>Jatuh Tempo:</strong> {{ $borrowing->due_date }}</p>
-    <p><strong>Tanggal Kembali:</strong> {{ $borrowing->return_date ?? '-' }}</p>
+    <p><strong>Tanggal Pinjam:</strong> {{ $borrowing->borrow_date->format('d-m-Y') }}</p>
+    <p><strong>Jatuh Tempo:</strong> {{ $borrowing->due_date->format('d-m-Y') }}</p>
+    <p><strong>Tanggal Kembali:</strong>
+        {{ $borrowing->return_date?->format('d-m-Y') ?? '-' }}
+    </p>
     <p><strong>Status:</strong> {{ $borrowing->status }}</p>
 
     <h3>Daftar Buku</h3>
@@ -51,7 +60,7 @@
         </tbody>
     </table>
 
-    @if ($borrowing->status !== 'returned')
+    @if ($borrowing->status === 'borrowed')
         <form
             action="{{ route('borrowings.return', $borrowing->id) }}"
             method="POST"
@@ -64,6 +73,4 @@
     @else
         <p style="color: green;">Buku sudah dikembalikan.</p>
     @endif
-
-</body>
-</html>
+@endsection

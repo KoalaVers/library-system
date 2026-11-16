@@ -1,11 +1,10 @@
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tambah Peminjaman</title>
-</head>
-<body>
-    <h1>Tambah Peminjaman Buku</h1>
+@extends('layouts.app')
+
+@section('title', 'Tambah Peminjaman')
+
+@section('content')
+    <h2>Tambah Peminjaman Buku</h2>
 
     <a href="{{ route('borrowings.index') }}">Kembali</a>
 
@@ -26,7 +25,8 @@
         <select name="member_id" required>
             <option value="">-- Pilih Anggota --</option>
             @foreach ($members as $member)
-                <option value="{{ $member->id }}">
+                <option value="{{ $member->id }}"
+                    {{ old('member_id') == $member->id ? 'selected' : '' }}>
                     {{ $member->name }} - {{ $member->member_code }}
                 </option>
             @endforeach
@@ -42,8 +42,7 @@
                         name="books[{{ $loop->index }}][book_id]"
                         value="{{ $book->id }}"
                     >
-                    {{ $book->title }}
-                    (Stok: {{ $book->stock }})
+                    {{ $book->title }} (Stok: {{ $book->stock }})
                 </label>
 
                 Jumlah:
@@ -60,5 +59,4 @@
         <br>
         <button type="submit">Simpan Peminjaman</button>
     </form>
-</body>
-</html>
+@endsection

@@ -11,9 +11,6 @@ use Illuminate\Validation\ValidationException;
 
 class BorrowingController extends Controller
 {
-    /**
-     * Menampilkan daftar transaksi peminjaman.
-     */
     public function index()
     {
         $borrowings = Borrowing::with(['member', 'user'])
@@ -23,9 +20,6 @@ class BorrowingController extends Controller
         return view('borrowings.index', compact('borrowings'));
     }
 
-    /**
-     * Menampilkan form peminjaman.
-     */
     public function create()
     {
         $members = Member::orderBy('name')->get();
@@ -34,48 +28,29 @@ class BorrowingController extends Controller
             ->orderBy('title')
             ->get();
 
-        return view('borrowings.create', compact(
-            'members',
-            'books'
-        ));
+        return view('borrowings.create', compact('members', 'books'));
     }
 
-    /**
-     * Menyimpan transaksi peminjaman.
-     */
     public function store(Request $request)
     {
-        
-            $booksInput = collect($request->input('books', []))
-                ->filter(function ($item) {
-                    return !empty($item['book_id']);
-                })
-                ->values()
-                ->all();
+        $booksInput = collect($request->input('books', []))
+            ->filter(function ($item) {
+                return is_array($item) && !empty($item['book_id']);
+            })
+            ->values()
+            ->all();
 
-            $request->merge([
-                'books' => $booksInput,
-            ]);
+        $request->merge(['books' => $booksInput]);
 
-            $validated = $request->validate([
-            'member_id' => [
-                'required',
-                'exists:members,id',
-            ],
-
-            'books' => [
-                'required',
-                'array',
-                'min:1',
-            ],
-
+        $validated = $request->validate([
+            'member_id' => ['required', 'exists:members,id'],
+            'books' => ['required', 'array', 'min:1'],
             'books.*.book_id' => [
                 'required',
                 'integer',
                 'distinct',
                 'exists:books,id',
             ],
-
             'books.*.quantity' => [
                 'required',
                 'integer',
@@ -84,7 +59,6 @@ class BorrowingController extends Controller
         ]);
 
         $borrowing = DB::transaction(function () use ($validated) {
-
             $borrowing = Borrowing::create([
                 'user_id' => auth()->id(),
                 'member_id' => $validated['member_id'],
@@ -95,16 +69,9 @@ class BorrowingController extends Controller
             ]);
 
             foreach ($validated['books'] as $item) {
-
                 $book = Book::whereKey($item['book_id'])
                     ->lockForUpdate()
-                    ->first();
-
-                if (!$book) {
-                    throw ValidationException::withMessages([
-                        'books' => 'Buku tidak ditemukan.',
-                    ]);
-                }
+                    ->firstOrFail();
 
                 if ($book->stock < $item['quantity']) {
                     throw ValidationException::withMessages([
@@ -128,9 +95,6 @@ class BorrowingController extends Controller
             ->with('success', 'Peminjaman buku berhasil disimpan.');
     }
 
-    /**
-     * Menampilkan detail transaksi.
-     */
     public function show(Borrowing $borrowing)
     {
         $borrowing->load([
@@ -142,27 +106,24 @@ class BorrowingController extends Controller
         return view('borrowings.show', compact('borrowing'));
     }
 
-    /**
-     * Memproses pengembalian buku.
-     */
     public function returnBook(Borrowing $borrowing)
     {
         DB::transaction(function () use ($borrowing) {
-
             $borrowing = Borrowing::whereKey($borrowing->id)
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($borrowing->status === 'returned') {
+            if ($borrowing->status !== 'borrowed') {
                 throw ValidationException::withMessages([
-                    'return' => 'Buku pada transaksi ini sudah dikembalikan.',
+                    'return' => 'Transaksi ini tidak dapat dikembalikan lagi.',
                 ]);
             }
 
-            $details = $borrowing->details()->get();
+            $details = $borrowing->details()
+                ->lockForUpdate()
+                ->get();
 
             foreach ($details as $detail) {
-
                 $book = Book::whereKey($detail->book_id)
                     ->lockForUpdate()
                     ->firstOrFail();
