@@ -20,7 +20,7 @@ class MemberController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'member_code' => 'required|string|unique:members,member_code',
             'name'        => 'required|string|max:255',
             'email'       => 'required|email|unique:members,email',
@@ -28,7 +28,7 @@ class MemberController extends Controller
             'address'     => 'nullable|string',
         ]);
 
-        Member::create($request->all());
+        Member::create($validated);
 
         return redirect()->route('members.index')->with('success', 'Anggota berhasil ditambahkan!');
     }
@@ -45,7 +45,7 @@ class MemberController extends Controller
 
     public function update(Request $request, Member $member)
     {
-        $request->validate([
+        $validated = $request->validate([
             'member_code' => 'required|string|unique:members,member_code,' . $member->id,
             'name'        => 'required|string|max:255',
             'email'       => 'required|email|unique:members,email,' . $member->id,
@@ -53,13 +53,17 @@ class MemberController extends Controller
             'address'     => 'nullable|string',
         ]);
 
-        $member->update($request->all());
+        $member->update($validated);
 
         return redirect()->route('members.index')->with('success', 'Data anggota berhasil diperbarui!');
     }
 
     public function destroy(Member $member)
     {
+        if (method_exists($member, 'borrowings') && $member->borrowings()->exists()) {
+            return back()->with('error', 'Anggota tidak dapat dihapus karena masih memiliki transaksi peminjaman.');
+        }
+
         $member->delete();
         return redirect()->route('members.index')->with('success', 'Data anggota berhasil dihapus!');
     }

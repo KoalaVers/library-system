@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -6,13 +7,14 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MemberController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\BorrowingController;
 
+// Halaman utama
 Route::get('/', function () {
-    return redirect()->route('login');
+    return view('welcome');
 });
 
+// Autentikasi
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])
         ->name('login');
@@ -25,16 +27,24 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
-
+// Semua fitur yang memerlukan login
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index']);
 
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
+
+    // Manajemen buku
     Route::resource('books', BookController::class);
 
-    Route::resource('categories', CategoryController::class);
+    // Manajemen kategori
+    Route::get('/categories', [CategoryController::class, 'index'])
+        ->name('categories.index');
+
+    // Manajemen anggota
     Route::resource('members', MemberController::class);
 
-    // Borrowing Management
+    // Manajemen peminjaman
     Route::resource('borrowings', BorrowingController::class)
         ->only(['index', 'create', 'store', 'show']);
 
@@ -45,12 +55,8 @@ Route::middleware('auth')->group(function () {
     )->name('borrowings.return');
 });
 
+// Pengelolaan kategori khusus Admin
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin-test', function () {
-        return 'Selamat datang, Admin! Anda memiliki akses.';
-    });
+    Route::resource('categories', CategoryController::class)
+        ->except(['index', 'show']);
 });
-
-Route::get('/admin-gate-test', function () {
-    return 'Gate berhasil! Admin boleh mengelola pengguna.';
-})->middleware(['auth', 'can:manage-users']);
