@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -23,6 +22,7 @@ Route::middleware('guest')->group(function () {
         ->name('login.submit');
 });
 
+// Logout
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
@@ -43,8 +43,11 @@ Route::middleware('auth')->group(function () {
 
     // Manajemen anggota
     Route::resource('members', MemberController::class);
+});
 
-    // Manajemen peminjaman
+// Manajemen peminjaman khusus Admin dan Petugas
+Route::middleware(['auth', 'role:admin,petugas'])->group(function () {
+
     Route::resource('borrowings', BorrowingController::class)
         ->only(['index', 'create', 'store', 'show']);
 
@@ -57,6 +60,17 @@ Route::middleware('auth')->group(function () {
 
 // Pengelolaan kategori khusus Admin
 Route::middleware(['auth', 'role:admin'])->group(function () {
+
     Route::resource('categories', CategoryController::class)
         ->except(['index', 'show']);
+
+    // Route pengujian middleware Admin milik Ray
+    Route::get('/admin-test', function () {
+        return 'Selamat datang, Admin! Anda memiliki akses.';
+    });
 });
+
+// Route pengujian Gate manage-users milik Ray
+Route::get('/admin-gate-test', function () {
+    return 'Gate berhasil! Admin boleh mengelola pengguna.';
+})->middleware(['auth', 'can:manage-users']);
