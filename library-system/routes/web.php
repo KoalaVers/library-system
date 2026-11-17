@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -27,7 +27,7 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
-// Semua fitur yang memerlukan login
+// Fitur yang memerlukan login
 Route::middleware('auth')->group(function () {
 
     // Dashboard
@@ -63,14 +63,4 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::resource('categories', CategoryController::class)
         ->except(['index', 'show']);
-
-    // Route pengujian middleware Admin milik Ray
-    Route::get('/admin-test', function () {
-        return 'Selamat datang, Admin! Anda memiliki akses.';
-    });
 });
-
-// Route pengujian Gate manage-users milik Ray
-Route::get('/admin-gate-test', function () {
-    return 'Gate berhasil! Admin boleh mengelola pengguna.';
-})->middleware(['auth', 'can:manage-users']);
