@@ -60,7 +60,7 @@ class MemberController extends Controller
 
     public function destroy(Member $member)
     {
-        if (method_exists($member, 'borrowings') && $member->borrowings()->exists()) {
+        if ($member->borrowings()->exists()) {
             return back()->with('error', 'Anggota tidak dapat dihapus karena masih memiliki transaksi peminjaman.');
         }
 

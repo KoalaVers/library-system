@@ -16,4 +16,9 @@ class Member extends Model
         'phone',
         'address',
     ];
+
+    public function borrowings()
+    {
+        return $this->hasMany('App\\Models\\Borrowing');
+    }
 }
