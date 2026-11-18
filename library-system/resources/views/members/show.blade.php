@@ -13,6 +13,6 @@
     <p><strong>Terdaftar Pada:</strong> {{ $member->created_at->format('d M Y') }}</p>
 
     <br>
-    <a href="{{ route('members.edit', $member) }}">Edit</a> | 
+    <a href="{{ route('members.edit', $member) }}">Edit</a>| 
     <a href="{{ route('members.index') }}">Kembali</a>
 @endsection

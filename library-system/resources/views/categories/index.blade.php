@@ -38,7 +38,7 @@
                     <td>{{ $category->books_count }} buku</td>
                     @if(auth()->user()->role === 'admin')
                         <td>
-                            <a href="{{ route('categories.edit', $category) }}">Edit</a> | 
+                            <a href="{{ route('categories.edit', $category) }}">Edit</a>| 
                             <form action="{{ route('categories.destroy', $category) }}" method="POST" style="display:inline;">
                                 @csrf
                                 @method('DELETE')

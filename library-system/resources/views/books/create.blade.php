@@ -1,15 +1,15 @@
 
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Buku</title>
-</head>
-<body>
+@extends('layouts.app')
+
+@section('title', 'Tambah Buku')
+
+@section('content')
+
     <h1>Tambah Buku</h1>
 
-    <a href="{{ route('books.index') }}">Kembali ke Daftar Buku</a>
+    <p>
+        <a href="{{ route('books.index') }}">Kembali ke Daftar Buku</a>
+    </p>
 
     @if ($errors->any())
         <div>
@@ -106,5 +106,5 @@
         <br>
         <button type="submit">Simpan Buku</button>
     </form>
-</body>
-</html>
+
+@endsection

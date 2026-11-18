@@ -35,8 +35,8 @@
                     <td>{{ $member->email }}</td>
                     <td>{{ $member->phone }}</td>
                     <td>
-                        <a href="{{ route('members.show', $member) }}">Detail</a> | 
-                        <a href="{{ route('members.edit', $member) }}">Edit</a> | 
+                        <a href="{{ route('members.show', $member) }}">Detail</a>| 
+                        <a href="{{ route('members.edit', $member) }}">Edit</a>| 
                         <form action="{{ route('members.destroy', $member) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('DELETE')

@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -6,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\BorrowingController;
 
 // Halaman utama
@@ -34,24 +36,28 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
-    // Manajemen buku
+    // Manajemen buku: Admin dan Petugas
     Route::resource('books', BookController::class);
 
-    // Manajemen kategori
+    // Kategori: Admin dan Petugas hanya dapat melihat
     Route::get('/categories', [CategoryController::class, 'index'])
         ->name('categories.index');
 
-    // Manajemen anggota
+    // Anggota: Admin dan Petugas dapat mengelola
     Route::resource('members', MemberController::class);
+
+    // Manajemen pengguna khusus Admin
+    Route::resource('users', UserController::class)
+        ->except(['show'])
+        ->middleware('can:manage-users');
 });
 
-// Manajemen peminjaman khusus Admin dan Petugas
+// Peminjaman dan pengembalian: Admin dan Petugas
 Route::middleware(['auth', 'role:admin,petugas'])->group(function () {
 
     Route::resource('borrowings', BorrowingController::class)
         ->only(['index', 'create', 'store', 'show']);
 
-    // Pengembalian buku
     Route::post(
         '/borrowings/{borrowing}/return',
         [BorrowingController::class, 'returnBook']
