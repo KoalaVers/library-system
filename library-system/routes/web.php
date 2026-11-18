@@ -6,11 +6,14 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\BorrowingController;
 
+// Halaman utama
 Route::get('/', function () {
     return view('welcome');
 });
 
+// Autentikasi
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])
         ->name('login');
@@ -19,21 +22,45 @@ Route::middleware('guest')->group(function () {
         ->name('login.submit');
 });
 
+// Logout
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
+// Fitur yang memerlukan login
 Route::middleware('auth')->group(function () {
+
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
+
+    // Manajemen buku
     Route::resource('books', BookController::class);
 
-    // Admin & Petugas dapat melihat daftar kategori & mengelola data anggota
-    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    // Manajemen kategori
+    Route::get('/categories', [CategoryController::class, 'index'])
+        ->name('categories.index');
+
+    // Manajemen anggota
     Route::resource('members', MemberController::class);
 });
 
-// Route khusus Admin untuk CRUD Kategori
+// Manajemen peminjaman khusus Admin dan Petugas
+Route::middleware(['auth', 'role:admin,petugas'])->group(function () {
+
+    Route::resource('borrowings', BorrowingController::class)
+        ->only(['index', 'create', 'store', 'show']);
+
+    // Pengembalian buku
+    Route::post(
+        '/borrowings/{borrowing}/return',
+        [BorrowingController::class, 'returnBook']
+    )->name('borrowings.return');
+});
+
+// Pengelolaan kategori khusus Admin
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::resource('categories', CategoryController::class)->except(['index', 'show']);
+
+    Route::resource('categories', CategoryController::class)
+        ->except(['index', 'show']);
 });

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Member extends Model
 {
@@ -17,8 +18,8 @@ class Member extends Model
         'address',
     ];
 
-    public function borrowings()
+    public function borrowings(): HasMany
     {
-        return $this->hasMany('App\\Models\\Borrowing');
+        return $this->hasMany(Borrowing::class);
     }
 }
