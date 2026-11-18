@@ -65,17 +65,16 @@ class MemberController extends Controller
 
     public function destroy(Member $member)
     {
-    if ($member->borrowings()->exists()) {
-        return back()->with(
-            'error',
-            'Anggota tidak dapat dihapus karena masih memiliki transaksi peminjaman.'
-        );
-    }
+        if ($member->borrowings()->exists()) {
+            return redirect()
+                ->route('members.index')
+                ->with('error', 'Anggota tidak dapat dihapus karena memiliki riwayat peminjaman.');
+        }
 
-    $member->delete();
+        $member->delete();
 
-    return redirect()
-        ->route('members.index')
-        ->with('success', 'Data anggota berhasil dihapus!');
+        return redirect()
+            ->route('members.index')
+            ->with('success', 'Anggota berhasil dihapus.');
     }
 }
