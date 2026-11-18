@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Book;
+use App\Models\Member;
+use App\Models\Borrowing;
 
 class DashboardController extends Controller
 {
@@ -11,15 +14,26 @@ class DashboardController extends Controller
         $title = 'Library System';
         $description = 'Sistem Informasi Perpustakaan Sederhana';
 
-        // Mengambil data buku langsung dari database
+        // Menghitung jumlah judul buku.
         $bookCount = Book::count();
+
+        // Menghitung seluruh stok buku.
         $totalStock = Book::sum('stock');
+
+        // Menghitung jumlah anggota perpustakaan.
+        $memberCount = Member::count();
+
+        // Menghitung peminjaman yang belum dikembalikan.
+        $activeBorrowings = Borrowing::where('status', 'borrowed')
+            ->count();
 
         return view('dashboard.index', compact(
             'title',
             'description',
             'bookCount',
-            'totalStock'
+            'totalStock',
+            'memberCount',
+            'activeBorrowings'
         ));
     }
 }

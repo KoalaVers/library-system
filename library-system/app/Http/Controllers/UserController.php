@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -79,25 +80,57 @@ class UserController extends Controller
             'role.in' => 'Role yang dipilih tidak valid.',
         ]);
 
-        // Jangan sampai sistem kehilangan seluruh akun Admin.
-        if (
-            $user->role === 'admin' &&
-            $validated['role'] !== 'admin' &&
-            User::where('role', 'admin')->count() <= 1
-        ) {
+        // Password hanya diperbarui jika diisi.
+        if (empty($validated['password'])) {
+            unset($validated['password']);
+        }
+
+        $result = DB::transaction(function () use ($validated, $user) {
+
+            // Mengunci data Admin selama proses perubahan berlangsung.
+            $admins = User::where('role', 'admin')
+                ->lockForUpdate()
+                ->get();
+
+            $user->refresh();
+
+            // Admin tidak boleh mengubah role akunnya sendiri.
+            if (
+                $user->getKey() == Auth::id() &&
+                $validated['role'] !== $user->role
+            ) {
+                return 'self_role_change';
+            }
+
+            // Pastikan selalu tersedia minimal satu Admin.
+            if (
+                $user->role === 'admin' &&
+                $validated['role'] !== 'admin' &&
+                $admins->count() <= 1
+            ) {
+                return 'last_admin';
+            }
+
+            $user->update($validated);
+
+            return 'success';
+        });
+
+        if ($result === 'self_role_change') {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'role' => 'Anda tidak dapat mengubah role akun sendiri.',
+                ]);
+        }
+
+        if ($result === 'last_admin') {
             return back()
                 ->withInput()
                 ->withErrors([
                     'role' => 'Minimal harus ada satu akun Admin.',
                 ]);
         }
-
-        // Password hanya diperbarui jika diisi.
-        if (empty($validated['password'])) {
-            unset($validated['password']);
-        }
-
-        $user->update($validated);
 
         return redirect()
             ->route('users.index')
@@ -114,18 +147,34 @@ class UserController extends Controller
             );
         }
 
-        // Lindungi agar selalu ada minimal satu Admin.
-        if (
-            $user->role === 'admin' &&
-            User::where('role', 'admin')->count() <= 1
-        ) {
+        $deleted = DB::transaction(function () use ($user) {
+
+            // Mengunci data Admin selama proses penghapusan.
+            $admins = User::where('role', 'admin')
+                ->lockForUpdate()
+                ->get();
+
+            $user->refresh();
+
+            // Admin terakhir tidak boleh dihapus.
+            if (
+                $user->role === 'admin' &&
+                $admins->count() <= 1
+            ) {
+                return false;
+            }
+
+            $user->delete();
+
+            return true;
+        });
+
+        if (!$deleted) {
             return back()->with(
                 'error',
                 'Admin terakhir tidak dapat dihapus.'
             );
         }
-
-        $user->delete();
 
         return redirect()
             ->route('users.index')
