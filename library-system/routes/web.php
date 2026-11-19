@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -29,44 +28,44 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
-// Fitur yang memerlukan login
+// Semua fitur yang memerlukan login
 Route::middleware('auth')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
-    // Manajemen buku: Admin dan Petugas
-    Route::resource('books', BookController::class);
+    // Fitur khusus Admin dan Petugas
+    Route::middleware('role:admin,petugas')->group(function () {
 
-    // Kategori: Admin dan Petugas hanya dapat melihat
-    Route::get('/categories', [CategoryController::class, 'index'])
-        ->name('categories.index');
+        // Manajemen buku
+        Route::resource('books', BookController::class);
 
-    // Anggota: Admin dan Petugas dapat mengelola
-    Route::resource('members', MemberController::class);
+        // Melihat kategori
+        Route::get('/categories', [CategoryController::class, 'index'])
+            ->name('categories.index');
+
+        // Manajemen anggota
+        Route::resource('members', MemberController::class);
+
+        // Peminjaman dan pengembalian
+        Route::resource('borrowings', BorrowingController::class)
+            ->only(['index', 'create', 'store', 'show']);
+
+        Route::post(
+            '/borrowings/{borrowing}/return',
+            [BorrowingController::class, 'returnBook']
+        )->name('borrowings.return');
+    });
 
     // Manajemen pengguna khusus Admin
     Route::resource('users', UserController::class)
         ->except(['show'])
         ->middleware('can:manage-users');
-});
 
-// Peminjaman dan pengembalian: Admin dan Petugas
-Route::middleware(['auth', 'role:admin,petugas'])->group(function () {
-
-    Route::resource('borrowings', BorrowingController::class)
-        ->only(['index', 'create', 'store', 'show']);
-
-    Route::post(
-        '/borrowings/{borrowing}/return',
-        [BorrowingController::class, 'returnBook']
-    )->name('borrowings.return');
-});
-
-// Pengelolaan kategori khusus Admin
-Route::middleware(['auth', 'role:admin'])->group(function () {
-
-    Route::resource('categories', CategoryController::class)
-        ->except(['index', 'show']);
+    // Pengelolaan kategori khusus Admin
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('categories', CategoryController::class)
+            ->except(['index', 'show']);
+    });
 });

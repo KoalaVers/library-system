@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class BookController extends Controller
 {
     public function index()
     {
-        // Ambil data buku beserta kategorinya.
+        Gate::authorize('viewAny', Book::class);
+
         $books = Book::with('category')->get();
 
         return view('books.index', compact('books'));
@@ -18,7 +20,8 @@ class BookController extends Controller
 
     public function create()
     {
-        // Ambil kategori untuk pilihan dropdown.
+        Gate::authorize('create', Book::class);
+
         $categories = Category::orderBy('name')->get();
 
         return view('books.create', compact('categories'));
@@ -26,6 +29,8 @@ class BookController extends Controller
 
     public function store(Request $request)
     {
+        Gate::authorize('create', Book::class);
+
         $currentYear = date('Y');
 
         $validated = $request->validate([
@@ -63,6 +68,8 @@ class BookController extends Controller
 
     public function show(Book $book)
     {
+        Gate::authorize('view', $book);
+
         $book->load('category');
 
         return view('books.show', compact('book'));
@@ -70,6 +77,8 @@ class BookController extends Controller
 
     public function edit(Book $book)
     {
+        Gate::authorize('update', $book);
+
         $categories = Category::orderBy('name')->get();
 
         return view('books.edit', compact('book', 'categories'));
@@ -77,6 +86,8 @@ class BookController extends Controller
 
     public function update(Request $request, Book $book)
     {
+        Gate::authorize('update', $book);
+
         $currentYear = date('Y');
 
         $validated = $request->validate([
@@ -112,13 +123,24 @@ class BookController extends Controller
             ->with('success', 'Data buku berhasil diperbarui.');
     }
 
-public function destroy(Book $book)
-{
-    \Illuminate\Support\Facades\Gate::authorize('delete', $book);
+    public function destroy(Book $book)
+    {
+        Gate::authorize('delete', $book);
 
-    $book->delete();
+        // Lindungi buku yang memiliki riwayat peminjaman.
+        if ($book->borrowingDetails()->exists()) {
+            return redirect()
+                ->route('books.index')
+                ->with(
+                    'error',
+                    'Buku tidak dapat dihapus karena sudah tercatat dalam riwayat peminjaman.'
+                );
+        }
 
-    return redirect()->route('books.index')
-        ->with('success', 'Buku berhasil dihapus.');
+        $book->delete();
+
+        return redirect()
+            ->route('books.index')
+            ->with('success', 'Buku berhasil dihapus.');
     }
 }
