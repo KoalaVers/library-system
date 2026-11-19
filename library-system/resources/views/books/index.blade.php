@@ -8,7 +8,14 @@
     <h1>Daftar Buku</h1>
 
     @if (session('success'))
-        <p>{{ session('success') }}</p>
+    <div style="color: green;">
+        {{ session('success') }}
+    </div>
+    @endif
+    @if (session('error'))
+    <div style="color: red; padding: 10px; margin-bottom: 15px; border: 1px solid red;">
+        {{ session('error') }}
+    </div>
     @endif
 
     <p>

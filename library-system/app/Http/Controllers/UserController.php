@@ -86,7 +86,6 @@ class UserController extends Controller
         }
 
         $result = DB::transaction(function () use ($validated, $user) {
-
             // Mengunci data Admin selama proses perubahan berlangsung.
             $admins = User::where('role', 'admin')
                 ->lockForUpdate()
@@ -94,7 +93,7 @@ class UserController extends Controller
 
             $user->refresh();
 
-            // Admin tidak boleh mengubah role akunnya sendiri.
+            // Admin tidak boleh mengubah role akun sendiri.
             if (
                 $user->getKey() == Auth::id() &&
                 $validated['role'] !== $user->role
@@ -139,7 +138,7 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        // Admin tidak boleh menghapus akunnya sendiri.
+        // Admin tidak boleh menghapus akun sendiri.
         if ($user->getKey() == Auth::id()) {
             return back()->with(
                 'error',
@@ -148,7 +147,6 @@ class UserController extends Controller
         }
 
         $deleted = DB::transaction(function () use ($user) {
-
             // Mengunci data Admin selama proses penghapusan.
             $admins = User::where('role', 'admin')
                 ->lockForUpdate()
