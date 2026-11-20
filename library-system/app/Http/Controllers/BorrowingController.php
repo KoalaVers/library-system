@@ -59,11 +59,13 @@ class BorrowingController extends Controller
         ]);
 
         $borrowing = DB::transaction(function () use ($validated) {
+            $borrowDate = now();
+
             $borrowing = Borrowing::create([
                 'user_id' => auth()->id(),
                 'member_id' => $validated['member_id'],
-                'borrow_date' => now()->toDateString(),
-                'due_date' => now()->addDays(7)->toDateString(),
+                'borrow_date' => $borrowDate->toDateString(),
+                'due_date' => $borrowDate->copy()->addDays(7)->toDateString(),
                 'return_date' => null,
                 'status' => 'borrowed',
             ]);
@@ -140,5 +142,64 @@ class BorrowingController extends Controller
         return redirect()
             ->route('borrowings.show', $borrowing->id)
             ->with('success', 'Pengembalian buku berhasil diproses.');
+    }
+
+    public function exportCsv()
+    {
+        $borrowings = Borrowing::with([
+            'member',
+            'user',
+            'details.book',
+        ])
+            ->orderBy('id')
+            ->get();
+
+        $fileName = 'laporan-peminjaman-' . now()->format('Y-m-d-His') . '.csv';
+
+        return response()->streamDownload(function () use ($borrowings) {
+            $handle = fopen('php://output', 'w');
+
+            // BOM UTF-8 agar karakter terbaca dengan baik di Excel.
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            // Header CSV.
+            fputcsv($handle, [
+                'ID Transaksi',
+                'Nama Anggota',
+                'Kode Anggota',
+                'Nama Petugas',
+                'Tanggal Peminjaman',
+                'Tanggal Jatuh Tempo',
+                'Tanggal Pengembalian',
+                'Status',
+                'Judul Buku',
+                'Nama Penulis',
+                'Jumlah Buku',
+            ], ';');
+
+            foreach ($borrowings as $borrowing) {
+                foreach ($borrowing->details as $detail) {
+                    fputcsv($handle, [
+                        $borrowing->id,
+                        $borrowing->member?->name ?? '-',
+                        $borrowing->member?->member_code ?? '-',
+                        $borrowing->user?->name ?? '-',
+                        $borrowing->borrow_date?->format('Y-m-d') ?? '-',
+                        $borrowing->due_date?->format('Y-m-d') ?? '-',
+                        $borrowing->return_date?->format('Y-m-d') ?? '-',
+                        $borrowing->status === 'returned'
+                            ? 'Dikembalikan'
+                            : 'Dipinjam',
+                        $detail->book?->title ?? '-',
+                        $detail->book?->author ?? '-',
+                        $detail->quantity,
+                    ], ';');
+                }
+            }
+
+            fclose($handle);
+        }, $fileName, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 }
