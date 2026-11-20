@@ -39,6 +39,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,petugas')->group(function () {
 
         // Manajemen buku
+        Route::get('/books/export', [BookController::class, 'exportCsv'])
+            ->name('books.export');
+
         Route::resource('books', BookController::class);
 
         // Melihat kategori
