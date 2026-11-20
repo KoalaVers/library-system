@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('title', 'Edit Buku')
@@ -22,7 +21,7 @@
         </div>
     @endif
 
-    <form action="{{ route('books.update', $book->id) }}" method="POST">
+    <form action="{{ route('books.update', $book->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -33,6 +32,8 @@
                 id="title"
                 name="title"
                 value="{{ old('title', $book->title) }}"
+                minlength="3"
+                maxlength="100"
                 required
             >
             @error('title')
@@ -100,6 +101,24 @@
                 @endforeach
             </select>
             @error('category_id')
+                <p>{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div>
+            <label for="cover">Cover Buku (Opsional, JPG/PNG/WEBP maks 2MB)</label><br>
+            @if ($book->cover)
+                <div style="margin: 8px 0;">
+                    <img src="{{ asset('storage/' . $book->cover) }}" alt="Cover {{ $book->title }}" width="80">
+                </div>
+            @endif
+            <input
+                type="file"
+                id="cover"
+                name="cover"
+                accept="image/jpeg,image/png,image/webp"
+            >
+            @error('cover')
                 <p>{{ $message }}</p>
             @enderror
         </div>

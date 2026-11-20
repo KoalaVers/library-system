@@ -8,6 +8,10 @@
 
     <a href="{{ route('borrowings.create') }}">+ Tambah Peminjaman</a>
 
+    <a href="{{ route('borrowings.export') }}">
+        Export CSV
+    </a>
+
     @if (session('success'))
         <p>{{ session('success') }}</p>
     @endif

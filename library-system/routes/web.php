@@ -39,6 +39,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,petugas')->group(function () {
 
         // Manajemen buku
+        Route::get('/books/export', [BookController::class, 'exportCsv'])
+            ->name('books.export');
+
         Route::resource('books', BookController::class);
 
         // Melihat kategori
@@ -49,9 +52,15 @@ Route::middleware('auth')->group(function () {
         Route::resource('members', MemberController::class);
 
         // Peminjaman dan pengembalian
+
+        // Export data peminjaman ke CSV
+        Route::get('/borrowings/export', [BorrowingController::class, 'exportCsv'])
+            ->name('borrowings.export');
+
         Route::resource('borrowings', BorrowingController::class)
             ->only(['index', 'create', 'store', 'show']);
 
+        // Pengembalian buku
         Route::post(
             '/borrowings/{borrowing}/return',
             [BorrowingController::class, 'returnBook']
