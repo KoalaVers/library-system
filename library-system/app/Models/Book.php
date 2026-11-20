@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\BorrowingDetail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,6 +25,6 @@ class Book extends Model
 
     public function borrowingDetails(): HasMany
     {
-        return $this->hasMany('App\\Models\\BorrowingDetail', 'book_id');
+        return $this->hasMany(BorrowingDetail::class, 'book_id');
     }
 }
