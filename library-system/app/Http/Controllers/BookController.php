@@ -20,7 +20,7 @@ class BookController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('author', 'like', "%{$search}%");
+                    ->orWhere('author', 'like', "%{$search}%");
             });
         }
 
@@ -173,7 +173,6 @@ class BookController extends Controller
     {
         Gate::authorize('delete', $book);
 
-        // Lindungi buku yang memiliki riwayat peminjaman.
         if ($book->borrowingDetails()->exists()) {
             return redirect()
                 ->route('books.index')
@@ -204,7 +203,7 @@ class BookController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('author', 'like', "%{$search}%");
+                    ->orWhere('author', 'like', "%{$search}%");
             });
         }
 
@@ -230,7 +229,15 @@ class BookController extends Controller
 
         $callback = function () use ($books) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['ID Buku', 'Judul Buku', 'Penulis', 'Tahun Terbit', 'Kategori', 'Jumlah Stok']);
+
+            fputcsv($file, [
+                'ID Buku',
+                'Judul Buku',
+                'Penulis',
+                'Tahun Terbit',
+                'Kategori',
+                'Jumlah Stok'
+            ]);
 
             foreach ($books as $book) {
                 fputcsv($file, [
