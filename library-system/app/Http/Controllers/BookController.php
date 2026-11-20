@@ -152,14 +152,17 @@ class BookController extends Controller
             'cover.max' => 'Ukuran file cover maksimal 2MB.',
         ]);
 
+        $oldCover = $book->cover;
+
         if ($request->hasFile('cover')) {
-            if ($book->cover && Storage::disk('public')->exists($book->cover)) {
-                Storage::disk('public')->delete($book->cover);
-            }
             $validated['cover'] = $request->file('cover')->store('covers', 'public');
         }
 
         $book->update($validated);
+
+        if ($request->hasFile('cover') && $oldCover && Storage::disk('public')->exists($oldCover)) {
+            Storage::disk('public')->delete($oldCover);
+        }
 
         return redirect()
             ->route('books.index')

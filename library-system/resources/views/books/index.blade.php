@@ -18,9 +18,15 @@
     @endif
 
     <p>
-        <a href="{{ route('books.create') }}">Tambah Buku</a>
+        @can('create', App\Models\Book::class)
+            <a href="{{ route('books.create') }}">Tambah Buku</a>
+            @if (\Illuminate\Support\Facades\Route::has('books.export'))
+                |
+            @endif
+        @endcan
+
         @if (\Illuminate\Support\Facades\Route::has('books.export'))
-            | <a href="{{ route('books.export', request()->query()) }}">Export CSV</a>
+            <a href="{{ route('books.export', request()->query()) }}">Export CSV</a>
         @endif
     </p>
 
@@ -86,8 +92,11 @@
                     <td>{{ $book->category?->name ?? 'Belum ada kategori' }}</td>
                     <td>
                         <a href="{{ route('books.show', $book->id) }}">Detail</a>
-                        |
-                        <a href="{{ route('books.edit', $book->id) }}">Edit</a>
+
+                        @can('update', $book)
+                            |
+                            <a href="{{ route('books.edit', $book->id) }}">Edit</a>
+                        @endcan
 
                         @can('delete', $book)
                             |
