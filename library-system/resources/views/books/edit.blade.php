@@ -1,111 +1,75 @@
-
 @extends('layouts.app')
 
 @section('title', 'Edit Buku')
 
 @section('content')
+    <h2>Edit Data Buku</h2>
 
-    <h1>Edit Buku</h1>
-
-    <p>
-        <a href="{{ route('books.index') }}">Kembali ke Daftar Buku</a>
-    </p>
-
-    @if ($errors->any())
-        <div>
-            <strong>Periksa kembali input berikut:</strong>
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <form action="{{ route('books.update', $book->id) }}" method="POST">
+    <form action="{{ route('books.update', $book) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
-
         <div>
-            <label for="title">Judul Buku</label><br>
-            <input
-                type="text"
-                id="title"
-                name="title"
-                value="{{ old('title', $book->title) }}"
-                required
-            >
+            <label>Judul Buku:</label><br>
+            <input type="text" name="title" value="{{ old('title', $book->title) }}">
             @error('title')
-                <p>{{ $message }}</p>
+                <p style="color: red; margin-top: 5px;">{{ $message }}</p>
             @enderror
         </div>
-
+        <br>
         <div>
-            <label for="author">Penulis</label><br>
-            <input
-                type="text"
-                id="author"
-                name="author"
-                value="{{ old('author', $book->author) }}"
-                required
-            >
-            @error('author')
-                <p>{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div>
-            <label for="year">Tahun Terbit</label><br>
-            <input
-                type="number"
-                id="year"
-                name="year"
-                value="{{ old('year', $book->year) }}"
-                min="1900"
-                max="{{ date('Y') }}"
-                required
-            >
-            @error('year')
-                <p>{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div>
-            <label for="stock">Stok</label><br>
-            <input
-                type="number"
-                id="stock"
-                name="stock"
-                value="{{ old('stock', $book->stock) }}"
-                min="0"
-                max="1000"
-                required
-            >
-            @error('stock')
-                <p>{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div>
-            <label for="category_id">Kategori</label><br>
-            <select id="category_id" name="category_id" required>
-                <option value="">Pilih kategori</option>
+            <label for="category_id">Kategori:</label><br>
+            <select name="category_id" id="category_id">
+                <option value="">-- Pilih Kategori --</option>
                 @foreach ($categories as $category)
-                    <option
-                        value="{{ $category->id }}"
-                        @selected(old('category_id', $book->category_id) == $category->id)
-                    >
+                    <option value="{{ $category->id }}" @selected(old('category_id', $book->category_id) == $category->id)>
                         {{ $category->name }}
                     </option>
                 @endforeach
             </select>
             @error('category_id')
-                <p>{{ $message }}</p>
+                <p style="color: red; margin-top: 5px;">{{ $message }}</p>
             @enderror
         </div>
-
         <br>
-        <button type="submit">Perbarui Buku</button>
+        <div>
+            <label>Penulis:</label><br>
+            <input type="text" name="author" value="{{ old('author', $book->author) }}">
+            @error('author')
+                <p style="color: red; margin-top: 5px;">{{ $message }}</p>
+            @enderror
+        </div>
+        <br>
+        <div>
+            <label>Tahun Terbit:</label><br>
+            <input type="text" name="year" value="{{ old('year', $book->year) }}">
+            @error('year')
+                <p style="color: red; margin-top: 5px;">{{ $message }}</p>
+            @enderror
+        </div>
+        <br>
+        <div>
+            <label>Stok:</label><br>
+            <input type="text" name="stock" value="{{ old('stock', $book->stock) }}">
+            @error('stock')
+                <p style="color: red; margin-top: 5px;">{{ $message }}</p>
+            @enderror
+        </div>
+        <br>
+        <div>
+            <label>Cover Buku Saat Ini:</label><br>
+            @if($book->cover)
+                <img src="{{ asset('storage/' . $book->cover) }}" alt="Cover {{ $book->title }}" width="100" style="margin-top: 5px; margin-bottom: 5px;"><br>
+            @else
+                <p style="color: #666; margin: 5px 0;"><em>Belum ada cover</em></p>
+            @endif
+            <label>Ganti Cover Buku (Opsional, JPG/PNG/WEBP, Maks 2MB):</label><br>
+            <input type="file" name="cover" accept="image/*">
+            @error('cover')
+                <p style="color: red; margin-top: 5px;">{{ $message }}</p>
+            @enderror
+        </div>
+        <br>
+        <button type="submit">Update</button>
+        <a href="{{ route('books.index') }}">Batal</a>
     </form>
-
 @endsection
